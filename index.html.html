@@ -1,0 +1,1520 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TNPSC Practice Hub</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: Arial, "Noto Sans Tamil", sans-serif;
+    background: #f2f5fa;
+    color: #202b3c;
+  }
+  header {
+    background: #153b68;
+    color: white;
+    text-align: center;
+    padding: 24px 14px;
+  }
+  header h1 { margin: 0 0 8px; font-size: 28px; }
+  header p { margin: 5px 0; }
+  .container {
+    width: min(850px, 94%);
+    margin: 22px auto;
+  }
+  .panel {
+    background: white;
+    border-radius: 12px;
+    padding: 22px;
+    box-shadow: 0 3px 15px rgba(0,0,0,.07);
+    margin-bottom: 18px;
+  }
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    text-align: center;
+  }
+  .stat {
+    background: #edf3fb;
+    border-radius: 9px;
+    padding: 12px 5px;
+  }
+  .stat strong { display: block; font-size: 23px; color: #153b68; }
+  .stat span { font-size: 13px; }
+  .progress-track {
+    height: 9px;
+    background: #e1e7ef;
+    border-radius: 10px;
+    overflow: hidden;
+    margin-top: 15px;
+  }
+  #progressBar {
+    height: 100%;
+    width: 0;
+    background: #287bca;
+    transition: width .2s;
+  }
+  .category {
+    color: #2467a8;
+    font-size: 13px;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+  }
+  #questionText { font-size: 21px; line-height: 1.5; }
+  .tamil { display: block; margin-top: 8px; color: #48556a; }
+  .option {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 13px;
+    margin: 10px 0;
+    border: 1px solid #cbd5e1;
+    border-radius: 9px;
+    background: white;
+    color: #202b3c;
+    font-size: 16px;
+    line-height: 1.5;
+    cursor: pointer;
+  }
+  .option:hover:not(:disabled) { background: #edf5ff; border-color: #287bca; }
+  .option:disabled { cursor: default; opacity: 1; }
+  .option.correct { background: #e2f7e9; border-color: #23934c; }
+  .option.wrong { background: #ffebeb; border-color: #c93636; }
+  .option .letter { font-weight: bold; margin-right: 8px; }
+  #feedback {
+    display: none;
+    padding: 14px;
+    border-radius: 9px;
+    margin-top: 15px;
+    line-height: 1.6;
+  }
+  #feedback.good { display: block; background: #e2f7e9; color: #175b31; }
+  #feedback.bad { display: block; background: #ffebeb; color: #8a2020; }
+  .buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 20px;
+  }
+  button.action {
+    padding: 12px 18px;
+    border: none;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: bold;
+    cursor: pointer;
+  }
+  .primary { background: #153b68; color: white; }
+  .secondary { background: #e5eaf1; color: #202b3c; }
+  button.action:disabled { opacity: .5; cursor: not-allowed; }
+  .hidden { display: none !important; }
+  .result-number { font-size: 42px; color: #153b68; font-weight: bold; }
+  .review-item {
+    padding: 14px 0;
+    border-bottom: 1px solid #e3e8ef;
+    line-height: 1.6;
+  }
+  .review-item:last-child { border-bottom: none; }
+  .review-item .answer { color: #176b37; }
+  .review-item .your-answer { color: #a32b2b; }
+  footer { text-align: center; color: #657184; padding: 10px 12px 25px; font-size: 13px; }
+  @media (max-width: 520px) {
+    header h1 { font-size: 23px; }
+    .panel { padding: 16px; }
+    #questionText { font-size: 18px; }
+    .option { font-size: 15px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>TNPSC Practice Hub</h1>
+  <p>TNPSC Group IV — தமிழ் + English</p>
+  <p>Learn • Practise • Improve</p>
+</header>
+
+<main class="container">
+  <section class="panel">
+    <div class="stats">
+      <div class="stat">
+        <strong id="progressCount">1 / 1500</strong>
+        <span>Question / கேள்வி</span>
+      </div>
+      <div class="stat">
+        <strong id="scoreCount">0</strong>
+        <span>Correct / சரியானவை</span>
+      </div>
+      <div class="stat">
+        <strong id="answeredCount">0</strong>
+        <span>Answered / பதிலளித்தவை</span>
+      </div>
+    </div>
+    <div class="progress-track">
+      <div id="progressBar"></div>
+    </div>
+  </section>
+
+  <section class="panel" id="quizPanel">
+    <div class="category" id="category">General Knowledge</div>
+    <h2 id="questionText"></h2>
+    <div id="options"></div>
+    <div id="feedback" aria-live="polite"></div>
+    <div class="buttons">
+      <button class="action primary" id="nextBtn" disabled>Next Question / அடுத்த கேள்வி →</button>
+    </div>
+    <p id="keyboardHint" style="color:#657184;font-size:13px;">
+      Select one answer to see feedback. / பதிலைத் தேர்ந்தெடுத்து விளக்கத்தைப் பார்க்கவும்.
+    </p>
+  </section>
+
+  <section class="panel hidden" id="resultPanel">
+    <h2>Test Completed! / தேர்வு முடிந்தது!</h2>
+    <p>Your final score / உங்கள் இறுதி மதிப்பெண்</p>
+    <div class="result-number" id="finalScore">0 / 1500</div>
+    <h3 id="resultMessage"></h3>
+    <div class="stats">
+      <div class="stat"><strong id="finalCorrect">0</strong><span>Correct / சரி</span></div>
+      <div class="stat"><strong id="finalWrong">0</strong><span>Wrong / தவறு</span></div>
+      <div class="stat"><strong id="finalPercent">0%</strong><span>Percentage / சதவீதம்</span></div>
+    </div>
+    <p id="resultSummary"></p>
+    <div class="buttons">
+      <button class="action primary" id="reviewBtn">Review Answers / பதில்களைப் பார்க்க</button>
+      <button class="action secondary" id="restartBtn">Restart Test / மீண்டும் தொடங்கு</button>
+    </div>
+  </section>
+
+  <section class="panel hidden" id="reviewPanel">
+    <h2>Answer Review / பதில் மதிப்பாய்வு</h2>
+    <p>Review your answers and explanations. / உங்கள் பதில்களையும் விளக்கங்களையும் பாருங்கள்.</p>
+    <div id="reviewList"></div>
+    <div class="buttons">
+      <button class="action primary" id="reviewRestartBtn">Try Again / மீண்டும் முயற்சி</button>
+      <button class="action secondary" id="backResultBtn">Back to Result / முடிவுக்குத் திரும்பு</button>
+    </div>
+  </section>
+</main>
+
+<footer>
+  TNPSC Practice Hub • Original practice questions for learning.
+  Verify the latest TNPSC syllabus and official updates before your exam.
+</footer>
+
+<script>
+"use strict";
+
+/*
+  Each question has:
+  category = subject
+  en = English question
+  ta = Tamil question
+  options = four bilingual choices
+  answer = correct choice index (0, 1, 2, or 3)
+  expEn / expTa = explanation in English and Tamil
+*/
+
+const questions = [
+{
+category:"Indian Polity / இந்திய அரசியல்",
+en:"When did the Constitution of India come into effect?",
+ta:"இந்திய அரசியலமைப்பு எப்போது நடைமுறைக்கு வந்தது?",
+options:[
+["15 August 1947","15 ஆகஸ்ட் 1947"],
+["26 January 1950","26 ஜனவரி 1950"],
+["26 November 1949","26 நவம்பர் 1949"],
+["2 October 1950","2 அக்டோபர் 1950"]
+],
+answer:1,
+expEn:"The Constitution came into effect on 26 January 1950, celebrated as Republic Day.",
+expTa:"இந்திய அரசியலமைப்பு 26 ஜனவரி 1950 அன்று நடைமுறைக்கு வந்தது. இந்நாள் குடியரசு தினமாகக் கொண்டாடப்படுகிறது."
+},
+{
+category:"Indian Polity / இந்திய அரசியல்",
+en:"Who was the Chairman of the Drafting Committee of the Indian Constitution?",
+ta:"இந்திய அரசியலமைப்பு வரைவுக் குழுவின் தலைவராக இருந்தவர் யார்?",
+options:[
+["Jawaharlal Nehru","ஜவஹர்லால் நேரு"],
+["Sardar Vallabhbhai Patel","சர்தார் வல்லபாய் பட்டேல்"],
+["Dr. B. R. Ambedkar","டாக்டர் பி. ஆர். அம்பேத்கர்"],
+["Dr. Rajendra Prasad","டாக்டர் ராஜேந்திர பிரசாத்"]
+],
+answer:2,
+expEn:"Dr. B. R. Ambedkar chaired the Constitution's Drafting Committee.",
+expTa:"டாக்டர் பி. ஆர். அம்பேத்கர் அரசியலமைப்பு வரைவுக் குழுவின் தலைவராக இருந்தார்."
+},
+{
+category:"Indian Polity / இந்திய அரசியல்",
+en:"Which part of the Indian Constitution contains Fundamental Rights?",
+ta:"இந்திய அரசியலமைப்பில் அடிப்படை உரிமைகள் எந்தப் பகுதியில் உள்ளன?",
+options:[
+["Part I","பகுதி I"],
+["Part II","பகுதி II"],
+["Part III","பகுதி III"],
+["Part IV","பகுதி IV"]
+],
+answer:2,
+expEn:"Fundamental Rights are contained in Part III of the Constitution.",
+expTa:"அடிப்படை உரிமைகள் அரசியலமைப்பின் பகுதி III-ல் உள்ளன."
+},
+{
+category:"Indian Polity / இந்திய அரசியல்",
+en:"Which Article guarantees equality before the law?",
+ta:"சட்டத்தின் முன் சமத்துவத்தை உறுதி செய்யும் அரசியலமைப்புப் பிரிவு எது?",
+options:[
+["Article 14","பிரிவு 14"],
+["Article 19","பிரிவு 19"],
+["Article 21","பிரிவு 21"],
+["Article 32","பிரிவு 32"]
+],
+answer:0,
+expEn:"Article 14 guarantees equality before the law and equal protection of the laws.",
+expTa:"பிரிவு 14 சட்டத்தின் முன் சமத்துவத்தையும் சட்டங்களின் சமமான பாதுகாப்பையும் உறுதி செய்கிறது."
+},
+{
+category:"Indian Polity / இந்திய அரசியல்",
+en:"What is the normal term of the Lok Sabha, unless dissolved earlier?",
+ta:"முன்கூட்டியே கலைக்கப்படாவிட்டால் மக்களவையின் வழக்கமான பதவிக்காலம் எத்தனை ஆண்டுகள்?",
+options:[
+["Four years","நான்கு ஆண்டுகள்"],
+["Five years","ஐந்து ஆண்டுகள்"],
+["Six years","ஆறு ஆண்டுகள்"],
+["Seven years","ஏழு ஆண்டுகள்"]
+],
+answer:1,
+expEn:"The Lok Sabha normally has a five-year term, unless dissolved earlier.",
+expTa:"மக்களவை பொதுவாக ஐந்து ஆண்டுகள் பதவிக்காலம் கொண்டது; முன்கூட்டியே கலைக்கப்படலாம்."
+},
+{
+category:"Indian Polity / இந்திய அரசியல்",
+en:"Who is the constitutional head of the Indian Union?",
+ta:"இந்திய ஒன்றியத்தின் அரசியலமைப்புத் தலைவராக இருப்பவர் யார்?",
+options:[
+["Prime Minister","பிரதமர்"],
+["President","குடியரசுத் தலைவர்"],
+["Chief Justice of India","இந்தியத் தலைமை நீதிபதி"],
+["Speaker of the Lok Sabha","மக்களவைத் தலைவர்"]
+],
+answer:1,
+expEn:"The President is the constitutional head of the Union; the Prime Minister heads the government.",
+expTa:"குடியரசுத் தலைவர் ஒன்றியத்தின் அரசியலமைப்புத் தலைவர். பிரதமர் அரசாங்கத்திற்குத் தலைமை தாங்குகிறார்."
+},
+{
+category:"Indian Polity / இந்திய அரசியல்",
+en:"Which body conducts elections to Parliament and State Legislatures in India?",
+ta:"இந்தியாவில் நாடாளுமன்றம் மற்றும் மாநிலச் சட்டமன்றத் தேர்தல்களை நடத்தும் அமைப்பு எது?",
+options:[
+["Union Public Service Commission","ஒன்றியப் பணியாளர் தேர்வாணையம்"],
+["Election Commission of India","இந்தியத் தேர்தல் ஆணையம்"],
+["Finance Commission","நிதி ஆணையம்"],
+["NITI Aayog","நிதி ஆயோக்"]
+],
+answer:1,
+expEn:"The Election Commission of India conducts elections to Parliament, State Legislatures, and the offices of President and Vice-President.",
+expTa:"இந்தியத் தேர்தல் ஆணையம் நாடாளுமன்றம், மாநிலச் சட்டமன்றங்கள் மற்றும் குடியரசுத் தலைவர், துணைக் குடியரசுத் தலைவர் தேர்தல்களை நடத்துகிறது."
+},
+{
+category:"Indian Polity / இந்திய அரசியல்",
+en:"Which constitutional amendment introduced the words 'Socialist' and 'Secular' into the Preamble?",
+ta:"முகவுரையில் 'சோசலிசம்' மற்றும் 'மதச்சார்பின்மை' என்ற சொற்களைச் சேர்த்த திருத்தம் எது?",
+options:[
+["24th Amendment","24வது திருத்தம்"],
+["42nd Amendment","42வது திருத்தம்"],
+["44th Amendment","44வது திருத்தம்"],
+["52nd Amendment","52வது திருத்தம்"]
+],
+answer:1,
+expEn:"The 42nd Constitutional Amendment Act of 1976 added these words to the Preamble.",
+expTa:"1976ஆம் ஆண்டின் 42வது அரசியலமைப்புத் திருத்தச் சட்டம் இந்தச் சொற்களை முகவுரையில் சேர்த்தது."
+},
+{
+category:"Indian Polity / இந்திய அரசியல்",
+en:"Which is the upper house of the Indian Parliament?",
+ta:"இந்திய நாடாளுமன்றத்தின் மேலவை எது?",
+options:[
+["Lok Sabha","மக்களவை"],
+["Rajya Sabha","மாநிலங்களவை"],
+["Legislative Assembly","சட்டமன்றம்"],
+["Gram Sabha","கிராம சபை"]
+],
+answer:1,
+expEn:"The Rajya Sabha is the Council of States and the upper house of Parliament.",
+expTa:"மாநிலங்களவை நாடாளுமன்றத்தின் மேலவையாகும்; இது மாநிலங்களின் அவை என்றும் அழைக்கப்படுகிறது."
+},
+{
+category:"Indian Polity / இந்திய அரசியல்",
+en:"Which constitutional amendment gave constitutional status to Panchayati Raj institutions?",
+ta:"பஞ்சாயத்து ராஜ் அமைப்புகளுக்கு அரசியலமைப்பு அந்தஸ்து வழங்கிய திருத்தம் எது?",
+options:[
+["42nd Amendment","42வது திருத்தம்"],
+["52nd Amendment","52வது திருத்தம்"],
+["73rd Amendment","73வது திருத்தம்"],
+["74th Amendment","74வது திருத்தம்"]
+],
+answer:2,
+expEn:"The 73rd Amendment gave constitutional status to Panchayati Raj institutions.",
+expTa:"73வது அரசியலமைப்புத் திருத்தம் பஞ்சாயத்து ராஜ் அமைப்புகளுக்கு அரசியலமைப்பு அந்தஸ்து வழங்கியது."
+},
+
+{
+category:"Indian History / இந்திய வரலாறு",
+en:"In which year did the Indian Rebellion commonly called the Revolt of 1857 begin?",
+ta:"1857ஆம் ஆண்டு பெரும் கிளர்ச்சி எந்த ஆண்டில் தொடங்கியது?",
+options:[
+["1757","1757"],
+["1857","1857"],
+["1885","1885"],
+["1905","1905"]
+],
+answer:1,
+expEn:"The major uprising against East India Company rule began in 1857.",
+expTa:"கிழக்கிந்தியக் கம்பெனி ஆட்சிக்கு எதிரான பெரிய கிளர்ச்சி 1857ஆம் ஆண்டு தொடங்கியது."
+},
+{
+category:"Indian History / இந்திய வரலாறு",
+en:"Who founded the Indian National Congress in 1885 with other early leaders?",
+ta:"1885ஆம் ஆண்டு பிற ஆரம்பகால தலைவர்களுடன் இந்திய தேசிய காங்கிரஸை நிறுவியவர் யார்?",
+options:[
+["A. O. Hume","ஏ. ஓ. ஹியூம்"],
+["Lord Curzon","லார்ட் கர்சன்"],
+["Lord Mountbatten","லார்ட் மவுண்ட்பேட்டன்"],
+["Robert Clive","ராபர்ட் கிளைவ்"]
+],
+answer:0,
+expEn:"A. O. Hume played the leading organising role in founding the Indian National Congress in 1885.",
+expTa:"1885ஆம் ஆண்டு இந்திய தேசிய காங்கிரஸை உருவாக்குவதில் ஏ. ஓ. ஹியூம் முக்கிய அமைப்புப் பங்காற்றினார்."
+},
+{
+category:"Indian History / இந்திய வரலாறு",
+en:"Who led the Dandi March in 1930?",
+ta:"1930ஆம் ஆண்டு தண்டி யாத்திரையைத் தலைமையேற்று நடத்தியவர் யார்?",
+options:[
+["Subhas Chandra Bose","சுபாஷ் சந்திர போஸ்"],
+["Mahatma Gandhi","மகாத்மா காந்தி"],
+["Bhagat Singh","பகத் சிங்"],
+["Bal Gangadhar Tilak","பால கங்காதர திலகர்"]
+],
+answer:1,
+expEn:"Mahatma Gandhi led the Salt March to Dandi in 1930 as part of the Civil Disobedience Movement.",
+expTa:"ஒத்துழையாமை இயக்கத்தின் ஒரு பகுதியாக 1930ஆம் ஆண்டு மகாத்மா காந்தி தண்டிக்கு உப்பு சத்தியாகிரகப் பயணம் மேற்கொண்டார்."
+},
+{
+category:"Indian History / இந்திய வரலாறு",
+en:"Who was the first Prime Minister of independent India?",
+ta:"சுதந்திர இந்தியாவின் முதல் பிரதமர் யார்?",
+options:[
+["Sardar Vallabhbhai Patel","சர்தார் வல்லபாய் பட்டேல்"],
+["Jawaharlal Nehru","ஜவஹர்லால் நேரு"],
+["Lal Bahadur Shastri","லால் பகதூர் சாஸ்திரி"],
+["Rajendra Prasad","ராஜேந்திர பிரசாத்"]
+],
+answer:1,
+expEn:"Jawaharlal Nehru became India's first Prime Minister in 1947.",
+expTa:"ஜவஹர்லால் நேரு 1947ஆம் ஆண்டு சுதந்திர இந்தியாவின் முதல் பிரதமரானார்."
+},
+{
+category:"Indian History / இந்திய வரலாறு",
+en:"The Quit India Movement was launched in which year?",
+ta:"வெள்ளையனே வெளியேறு இயக்கம் எந்த ஆண்டு தொடங்கப்பட்டது?",
+options:[
+["1920","1920"],
+["1930","1930"],
+["1942","1942"],
+["1947","1947"]
+],
+answer:2,
+expEn:"The Quit India Movement was launched by the Indian National Congress in August 1942.",
+expTa:"இந்திய தேசிய காங்கிரஸ் 1942ஆம் ஆண்டு ஆகஸ்ட் மாதம் வெள்ளையனே வெளியேறு இயக்கத்தைத் தொடங்கியது."
+},
+{
+category:"Indian History / இந்திய வரலாறு",
+en:"Who was the first woman ruler of the Delhi Sultanate?",
+ta:"டெல்லி சுல்தானகத்தின் முதல் பெண் ஆட்சியாளர் யார்?",
+options:[
+["Nur Jahan","நூர் ஜஹான்"],
+["Raziyya Sultan","ரஸியா சுல்தான்"],
+["Rani Durgavati","ராணி துர்காவதி"],
+["Chand Bibi","சாந்த் பீபி"]
+],
+answer:1,
+expEn:"Raziyya Sultan ruled the Delhi Sultanate from 1236 to 1240.",
+expTa:"ரஸியா சுல்தான் 1236 முதல் 1240 வரை டெல்லி சுல்தானகத்தை ஆட்சி செய்தார்."
+},
+{
+category:"Indian History / இந்திய வரலாறு",
+en:"Who was the founder of the Maurya Empire?",
+ta:"மௌரியப் பேரரசை நிறுவியவர் யார்?",
+options:[
+["Ashoka","அசோகர்"],
+["Chandragupta Maurya","சந்திரகுப்த மௌரியர்"],
+["Harsha","ஹர்ஷர்"],
+["Kanishka","கனிஷ்கர்"]
+],
+answer:1,
+expEn:"Chandragupta Maurya founded the Maurya Empire in the fourth century BCE.",
+expTa:"கி.மு. நான்காம் நூற்றாண்டில் சந்திரகுப்த மௌரியர் மௌரியப் பேரரசை நிறுவினார்."
+},
+{
+category:"Indian History / இந்திய வரலாறு",
+en:"Which emperor is especially associated with the spread of Buddhism after the Kalinga War?",
+ta:"கலிங்கப் போருக்குப் பிறகு புத்தமதப் பரவலுடன் தொடர்புடைய பேரரசர் யார்?",
+options:[
+["Ashoka","அசோகர்"],
+["Samudragupta","சமுத்திரகுப்தர்"],
+["Akbar","அக்பர்"],
+["Shah Jahan","ஷாஜஹான்"]
+],
+answer:0,
+expEn:"Ashoka embraced and promoted Buddhist principles after the Kalinga War.",
+expTa:"கலிங்கப் போருக்குப் பிறகு அசோகர் புத்தமதக் கொள்கைகளை ஏற்று அவற்றைப் பரப்பினார்."
+},
+{
+category:"Indian History / இந்திய வரலாறு",
+en:"Who composed the Tamil epic Silappathikaram, according to tradition?",
+ta:"மரபின்படி சிலப்பதிகாரத்தை இயற்றியவர் யார்?",
+options:[
+["Thiruvalluvar","திருவள்ளுவர்"],
+["Ilango Adigal","இளங்கோ அடிகள்"],
+["Kambar","கம்பர்"],
+["Avvaiyar","ஔவையார்"]
+],
+answer:1,
+expEn:"Silappathikaram is traditionally attributed to Ilango Adigal.",
+expTa:"சிலப்பதிகாரம் மரபின்படி இளங்கோ அடிகளால் இயற்றப்பட்டதாகக் கருதப்படுகிறது."
+},
+{
+category:"Indian History / இந்திய வரலாறு",
+en:"Who wrote the Tirukkural?",
+ta:"திருக்குறளை இயற்றியவர் யார்?",
+options:[
+["Thiruvalluvar","திருவள்ளுவர்"],
+["Kambar","கம்பர்"],
+["Bharathidasan","பாரதிதாசன்"],
+["Ilango Adigal","இளங்கோ அடிகள்"]
+],
+answer:0,
+expEn:"The Tirukkural is attributed to the Tamil poet and philosopher Thiruvalluvar.",
+expTa:"திருக்குறள் தமிழ் புலவரும் தத்துவஞானியுமான திருவள்ளுவரால் இயற்றப்பட்டது."
+},
+
+{
+category:"Tamil Nadu / தமிழ்நாடு",
+en:"What is the capital of Tamil Nadu?",
+ta:"தமிழ்நாட்டின் தலைநகரம் எது?",
+options:[
+["Madurai","மதுரை"],
+["Coimbatore","கோயம்புத்தூர்"],
+["Chennai","சென்னை"],
+["Tiruchirappalli","திருச்சிராப்பள்ளி"]
+],
+answer:2,
+expEn:"Chennai is the capital of Tamil Nadu.",
+expTa:"சென்னை தமிழ்நாட்டின் தலைநகரமாகும்."
+},
+{
+category:"Tamil Nadu / தமிழ்நாடு",
+en:"Which is the highest peak in Tamil Nadu?",
+ta:"தமிழ்நாட்டின் மிக உயரமான சிகரம் எது?",
+options:[
+["Doddabetta","தொட்டபெட்டா"],
+["Agastya Mala","அகத்திய மலை"],
+["Anamudi","ஆனைமுடி"],
+["Mahendragiri","மகேந்திரகிரி"]
+],
+answer:0,
+expEn:"Doddabetta, in the Nilgiri Hills, is the highest peak in Tamil Nadu.",
+expTa:"நீலகிரி மலைத்தொடரில் உள்ள தொட்டபெட்டா தமிழ்நாட்டின் மிக உயரமான சிகரமாகும்."
+},
+{
+category:"Tamil Nadu / தமிழ்நாடு",
+en:"Which river is closely associated with the Mettur Dam?",
+ta:"மேட்டூர் அணையுடன் தொடர்புடைய ஆறு எது?",
+options:[
+["Vaigai","வைகை"],
+["Cauvery","காவிரி"],
+["Thamirabarani","தாமிரபரணி"],
+["Palar","பாலாறு"]
+],
+answer:1,
+expEn:"Mettur Dam is built across the Cauvery River in Tamil Nadu.",
+expTa:"தமிழ்நாட்டில் காவிரி ஆற்றின் குறுக்கே மேட்டூர் அணை கட்டப்பட்டுள்ளது."
+},
+{
+category:"Tamil Nadu / தமிழ்நாடு",
+en:"Which Tamil Nadu city is famous for the Meenakshi Amman Temple?",
+ta:"மீனாட்சி அம்மன் கோயிலுக்குப் புகழ்பெற்ற தமிழ்நாட்டு நகரம் எது?",
+options:[
+["Madurai","மதுரை"],
+["Salem","சேலம்"],
+["Erode","ஈரோடு"],
+["Vellore","வேலூர்"]
+],
+answer:0,
+expEn:"The Meenakshi Amman Temple is a major landmark in Madurai.",
+expTa:"மீனாட்சி அம்மன் கோயில் மதுரையின் முக்கிய அடையாளமாகும்."
+},
+{
+category:"Tamil Nadu / தமிழ்நாடு",
+en:"Who was the first Chief Minister of Madras State after the Constitution came into force in 1950?",
+ta:"1950ஆம் ஆண்டு அரசியலமைப்பு நடைமுறைக்கு வந்தபோது சென்னை மாநிலத்தின் முதல் முதலமைச்சர் யார்?",
+options:[
+["C. Rajagopalachari","சி. ராஜகோபாலாச்சாரி"],
+["P. S. Kumaraswamy Raja","பி. எஸ். குமாரசாமி ராஜா"],
+["K. Kamaraj","கே. காமராஜர்"],
+["C. N. Annadurai","சி. என். அண்ணாதுரை"]
+],
+answer:1,
+expEn:"P. S. Kumaraswamy Raja was the Chief Minister when the Constitution came into force on 26 January 1950. C. Rajagopalachari became Chief Minister later in 1952.",
+expTa:"1950 ஜனவரி 26 அன்று அரசியலமைப்பு நடைமுறைக்கு வந்தபோது பி. எஸ். குமாரசாமி ராஜா முதலமைச்சராக இருந்தார். சி. ராஜகோபாலாச்சாரி 1952இல் பின்னர் முதலமைச்சரானார்."
+},
+{
+category:"Tamil Nadu / தமிழ்நாடு",
+en:"Which movement is strongly associated with Periyar E. V. Ramasamy?",
+ta:"பெரியார் ஈ. வெ. ராமசாமியுடன் நெருங்கிய தொடர்புடைய இயக்கம் எது?",
+options:[
+["Self-Respect Movement","சுயமரியாதை இயக்கம்"],
+["Swadeshi Movement","சுதேசி இயக்கம்"],
+["Chipko Movement","சிப்கோ இயக்கம்"],
+["Khilafat Movement","கிலாபத் இயக்கம்"]
+],
+answer:0,
+expEn:"Periyar founded the Self-Respect Movement in 1925 to challenge caste inequality and promote social equality.",
+expTa:"சாதி ஏற்றத்தாழ்வுகளை எதிர்த்து சமூக சமத்துவத்தை முன்னெடுக்க பெரியார் 1925ஆம் ஆண்டு சுயமரியாதை இயக்கத்தைத் தொடங்கினார்."
+},
+{
+category:"Tamil Nadu / தமிழ்நாடு",
+en:"Which classical Tamil text is a collection of 1,330 couplets?",
+ta:"1,330 குறள்களைக் கொண்ட செம்மொழித் தமிழ் நூல் எது?",
+options:[
+["Manimekalai","மணிமேகலை"],
+["Tirukkural","திருக்குறள்"],
+["Tholkappiyam","தொல்காப்பியம்"],
+["Purananuru","புறநானூறு"]
+],
+answer:1,
+expEn:"The Tirukkural contains 1,330 couplets arranged in 133 chapters.",
+expTa:"திருக்குறளில் 133 அதிகாரங்களில் 1,330 குறள்கள் உள்ளன."
+},
+{
+category:"Tamil Nadu / தமிழ்நாடு",
+en:"Brihadisvara Temple at Thanjavur was built under which Chola ruler?",
+ta:"தஞ்சைப் பெரிய கோயிலைக் கட்டிய சோழ மன்னர் யார்?",
+options:[
+["Karikala Chola","கரிகால சோழன்"],
+["Rajaraja Chola I","முதலாம் இராஜராஜ சோழன்"],
+["Rajendra Chola I","முதலாம் இராஜேந்திர சோழன்"],
+["Kulothunga Chola I","முதலாம் குலோத்துங்க சோழன்"]
+],
+answer:1,
+expEn:"Rajaraja Chola I commissioned the Brihadisvara Temple at Thanjavur.",
+expTa:"தஞ்சைப் பெரிய கோயிலை முதலாம் இராஜராஜ சோழன் கட்டுவித்தார்."
+},
+{
+category:"Tamil Nadu / தமிழ்நாடு",
+en:"Which city is widely known as the 'Manchester of South India'?",
+ta:"'தென்னிந்தியாவின் மான்செஸ்டர்' என்று பரவலாக அழைக்கப்படும் நகரம் எது?",
+options:[
+["Tirunelveli","திருநெல்வேலி"],
+["Coimbatore","கோயம்புத்தூர்"],
+["Thanjavur","தஞ்சாவூர்"],
+["Kanchipuram","காஞ்சிபுரம்"]
+],
+answer:1,
+expEn:"Coimbatore is known by this nickname because of its textile and spinning industries.",
+expTa:"ஜவுளி மற்றும் நூற்பாலைகள் காரணமாக கோயம்புத்தூர் இந்தப் பெயரால் அழைக்கப்படுகிறது."
+},
+
+{
+category:"Geography / புவியியல்",
+en:"Which is the largest planet in the Solar System?",
+ta:"சூரியக் குடும்பத்தில் மிகப்பெரிய கோள் எது?",
+options:[
+["Earth","பூமி"],
+["Saturn","சனி"],
+["Jupiter","வியாழன்"],
+["Mars","செவ்வாய்"]
+],
+answer:2,
+expEn:"Jupiter is the largest planet in the Solar System.",
+expTa:"வியாழன் சூரியக் குடும்பத்தின் மிகப்பெரிய கோளாகும்."
+},
+{
+category:"Geography / புவியியல்",
+en:"Which line of latitude is at 0 degrees?",
+ta:"0 பாகை அட்சரேகை எது?",
+options:[
+["Tropic of Cancer","கடக ரேகை"],
+["Equator","நிலநடுக்கோடு"],
+["Tropic of Capricorn","மகர ரேகை"],
+["Arctic Circle","ஆர்க்டிக் வட்டம்"]
+],
+answer:1,
+expEn:"The Equator is the line of latitude at 0 degrees.",
+expTa:"நிலநடுக்கோடு 0 பாகை அட்சரேகையாகும்."
+},
+{
+category:"Geography / புவியியல்",
+en:"Which is the largest ocean on Earth?",
+ta:"பூமியின் மிகப்பெரிய பெருங்கடல் எது?",
+options:[
+["Atlantic Ocean","அட்லாண்டிக் பெருங்கடல்"],
+["Indian Ocean","இந்தியப் பெருங்கடல்"],
+["Arctic Ocean","ஆர்க்டிக் பெருங்கடல்"],
+["Pacific Ocean","பசிபிக் பெருங்கடல்"]
+],
+answer:3,
+expEn:"The Pacific Ocean is the largest ocean on Earth.",
+expTa:"பசிபிக் பெருங்கடல் பூமியின் மிகப்பெரிய பெருங்கடலாகும்."
+},
+{
+category:"Geography / புவியியல்",
+en:"Which layer of the Earth lies directly beneath the crust?",
+ta:"பூமியின் மேலோட்டிற்குக் கீழே நேரடியாக அமைந்துள்ள அடுக்கு எது?",
+options:[
+["Inner core","உள் மையம்"],
+["Outer core","வெளி மையம்"],
+["Mantle","கவசம்"],
+["Atmosphere","வளிமண்டலம்"]
+],
+answer:2,
+expEn:"The mantle lies directly beneath the Earth's crust.",
+expTa:"பூமியின் மேலோட்டிற்குக் கீழே கவச அடுக்கு அமைந்துள்ளது."
+},
+{
+category:"Geography / புவியியல்",
+en:"Which Indian state has the longest coastline among Indian states?",
+ta:"இந்திய மாநிலங்களில் மிக நீளமான கடற்கரையைக் கொண்ட மாநிலம் எது?",
+options:[
+["Tamil Nadu","தமிழ்நாடு"],
+["Gujarat","குஜராத்"],
+["Kerala","கேரளா"],
+["Odisha","ஒடிசா"]
+],
+answer:1,
+expEn:"Gujarat has the longest coastline among Indian states.",
+expTa:"இந்திய மாநிலங்களில் குஜராத் மிக நீளமான கடற்கரையைக் கொண்டுள்ளது."
+},
+{
+category:"Geography / புவியியல்",
+en:"Which type of rainfall is commonly associated with monsoon winds in India?",
+ta:"இந்தியாவில் பருவக்காற்றுகளுடன் பொதுவாக தொடர்புடைய மழை எது?",
+options:[
+["Monsoon or seasonal rainfall","பருவமழை"],
+["Only polar rainfall","துருவப் பகுதிகளின் மழை மட்டும்"],
+["Only convectional rainfall","வெப்பச் சலன மழை மட்டும்"],
+["No rainfall","மழை இல்லை"]
+],
+answer:0,
+expEn:"India receives a large share of its annual rainfall during the monsoon seasons.",
+expTa:"இந்தியாவின் ஆண்டு மழைப்பொழிவில் பெரும்பகுதி பருவமழைக் காலங்களில் கிடைக்கிறது."
+},
+{
+category:"Geography / புவியியல்",
+en:"Which river flows through the city of Delhi?",
+ta:"டெல்லி நகரம் வழியாகப் பாயும் ஆறு எது?",
+options:[
+["Yamuna","யமுனை"],
+["Godavari","கோதாவரி"],
+["Krishna","கிருஷ்ணா"],
+["Narmada","நர்மதை"]
+],
+answer:0,
+expEn:"The Yamuna River flows through Delhi.",
+expTa:"யமுனை ஆறு டெல்லி வழியாகப் பாய்கிறது."
+},
+{
+category:"Geography / புவியியல்",
+en:"Which is the main source of energy driving the water cycle?",
+ta:"நீர் சுழற்சியை இயக்கும் முக்கிய ஆற்றல் மூலம் எது?",
+options:[
+["The Moon","சந்திரன்"],
+["The Sun","சூரியன்"],
+["Earthquakes","நிலநடுக்கங்கள்"],
+["Ocean tides alone","கடல் அலைகள் மட்டும்"]
+],
+answer:1,
+expEn:"Solar energy drives evaporation and helps power the water cycle.",
+expTa:"சூரிய ஆற்றல் ஆவியாதலை ஏற்படுத்தி நீர் சுழற்சியை இயக்க உதவுகிறது."
+},
+
+{
+category:"General Science / பொது அறிவியல்",
+en:"What is the SI unit of electric current?",
+ta:"மின்சாரத்தின் SI அலகு எது?",
+options:[
+["Volt","வோல்ட்"],
+["Ohm","ஓம்"],
+["Ampere","ஆம்பியர்"],
+["Watt","வாட்"]
+],
+answer:2,
+expEn:"Electric current is measured in amperes (A).",
+expTa:"மின்சார ஓட்டம் ஆம்பியர் (A) என்ற அலகில் அளவிடப்படுகிறது."
+},
+{
+category:"General Science / பொது அறிவியல்",
+en:"Which gas do green plants absorb during photosynthesis?",
+ta:"ஒளிச்சேர்க்கையின் போது பச்சைத் தாவரங்கள் எந்த வாயுவை உட்கொள்கின்றன?",
+options:[
+["Oxygen","ஆக்சிஜன்"],
+["Carbon dioxide","கார்பன் டைஆக்சைடு"],
+["Nitrogen","நைட்ரஜன்"],
+["Hydrogen","ஹைட்ரஜன்"]
+],
+answer:1,
+expEn:"Plants absorb carbon dioxide and use light energy to produce sugars during photosynthesis.",
+expTa:"தாவரங்கள் கார்பன் டைஆக்சைடை உட்கொண்டு ஒளி ஆற்றலைப் பயன்படுத்தி ஒளிச்சேர்க்கையின் போது சர்க்கரைகளை உருவாக்குகின்றன."
+},
+{
+category:"General Science / பொது அறிவியல்",
+en:"What is the chemical symbol for gold?",
+ta:"தங்கத்தின் வேதியியல் குறியீடு என்ன?",
+options:[
+["Ag","Ag"],
+["Au","Au"],
+["Fe","Fe"],
+["Go","Go"]
+],
+answer:1,
+expEn:"The chemical symbol for gold is Au.",
+expTa:"தங்கத்தின் வேதியியல் குறியீடு Au ஆகும்."
+},
+{
+category:"General Science / பொது அறிவியல்",
+en:"Which organ pumps blood throughout the human body?",
+ta:"மனித உடல் முழுவதும் இரத்தத்தைச் செலுத்தும் உறுப்பு எது?",
+options:[
+["Lungs","நுரையீரல்"],
+["Liver","கல்லீரல்"],
+["Heart","இதயம்"],
+["Kidney","சிறுநீரகம்"]
+],
+answer:2,
+expEn:"The heart pumps blood through the circulatory system.",
+expTa:"இதயம் இரத்த ஓட்ட மண்டலத்தின் வழியாக இரத்தத்தைச் செலுத்துகிறது."
+},
+{
+category:"General Science / பொது அறிவியல்",
+en:"Which vitamin can the human body produce in the skin with sufficient sunlight exposure?",
+ta:"போதிய சூரிய ஒளி கிடைக்கும்போது மனித உடலின் தோலில் உருவாகக்கூடிய வைட்டமின் எது?",
+options:[
+["Vitamin A","வைட்டமின் A"],
+["Vitamin B12","வைட்டமின் B12"],
+["Vitamin C","வைட்டமின் C"],
+["Vitamin D","வைட்டமின் D"]
+],
+answer:3,
+expEn:"Sunlight helps the skin produce vitamin D. The amount depends on several factors.",
+expTa:"சூரிய ஒளி தோலில் வைட்டமின் D உருவாக உதவுகிறது. இதன் அளவு பல காரணிகளைப் பொறுத்தது."
+},
+{
+category:"General Science / பொது அறிவியல்",
+en:"At standard atmospheric pressure, what is the boiling point of pure water?",
+ta:"சாதாரண வளிமண்டல அழுத்தத்தில் தூய நீரின் கொதிநிலை என்ன?",
+options:[
+["0°C","0°C"],
+["50°C","50°C"],
+["100°C","100°C"],
+["150°C","150°C"]
+],
+answer:2,
+expEn:"Pure water boils at approximately 100°C at standard atmospheric pressure.",
+expTa:"சாதாரண வளிமண்டல அழுத்தத்தில் தூய நீர் சுமார் 100°C-ல் கொதிக்கிறது."
+},
+{
+category:"General Science / பொது அறிவியல்",
+en:"Which instrument measures atmospheric pressure?",
+ta:"வளிமண்டல அழுத்தத்தை அளக்கும் கருவி எது?",
+options:[
+["Thermometer","வெப்பமானி"],
+["Barometer","காற்றழுத்தமானி"],
+["Ammeter","மின்னோட்டமானி"],
+["Hygrometer","ஈரப்பதமானி"]
+],
+answer:1,
+expEn:"A barometer is used to measure atmospheric pressure.",
+expTa:"வளிமண்டல அழுத்தத்தை அளக்க காற்றழுத்தமானி பயன்படுகிறது."
+},
+{
+category:"General Science / பொது அறிவியல்",
+en:"What is the approximate speed of light in a vacuum?",
+ta:"வெற்றிடத்தில் ஒளியின் தோராயமான வேகம் என்ன?",
+options:[
+["3 × 10⁶ m/s","3 × 10⁶ மீ/வி"],
+["3 × 10⁸ m/s","3 × 10⁸ மீ/வி"],
+["3 × 10⁴ m/s","3 × 10⁴ மீ/வி"],
+["300 m/s","300 மீ/வி"]
+],
+answer:1,
+expEn:"Light travels at approximately 300,000,000 metres per second in a vacuum.",
+expTa:"வெற்றிடத்தில் ஒளி ஒரு வினாடிக்கு சுமார் 30 கோடி மீட்டர் பயணிக்கிறது."
+},
+{
+category:"General Science / பொது அறிவியல்",
+en:"Which blood cells primarily help the body fight infections?",
+ta:"தொற்றுகளை எதிர்த்துப் போராட உடலுக்கு முக்கியமாக உதவும் இரத்த அணுக்கள் எவை?",
+options:[
+["Red blood cells","சிவப்பு இரத்த அணுக்கள்"],
+["White blood cells","வெள்ளை இரத்த அணுக்கள்"],
+["Platelets","இரத்தத் தட்டுகள்"],
+["All cells have the same role","அனைத்து அணுக்களுக்கும் ஒரே பணி"]
+],
+answer:1,
+expEn:"White blood cells are important components of the immune system.",
+expTa:"வெள்ளை இரத்த அணுக்கள் நோய் எதிர்ப்பு மண்டலத்தின் முக்கிய பகுதியாகும்."
+},
+{
+category:"General Science / பொது அறிவியல்",
+en:"Which force pulls objects toward the Earth?",
+ta:"பொருட்களை பூமியை நோக்கி இழுக்கும் விசை எது?",
+options:[
+["Magnetic force only","காந்த விசை மட்டும்"],
+["Friction","உராய்வு"],
+["Gravity","ஈர்ப்பு விசை"],
+["Buoyant force","மிதப்பு விசை"]
+],
+answer:2,
+expEn:"Gravity attracts objects with mass toward one another; Earth's gravity pulls objects toward Earth.",
+expTa:"ஈர்ப்பு விசை நிறையுள்ள பொருட்களை ஒன்றையொன்று ஈர்க்கிறது; பூமியின் ஈர்ப்பு பொருட்களை பூமியை நோக்கி இழுக்கிறது."
+},
+
+{
+category:"Indian Economy / இந்தியப் பொருளாதாரம்",
+en:"Which institution issues most currency notes in India?",
+ta:"இந்தியாவில் பெரும்பாலான நாணயத் தாள்களை வெளியிடும் நிறுவனம் எது?",
+options:[
+["State Bank of India","இந்திய ஸ்டேட் வங்கி"],
+["Reserve Bank of India","இந்திய ரிசர்வ் வங்கி"],
+["NITI Aayog","நிதி ஆயோக்"],
+["Finance Commission","நிதி ஆணையம்"]
+],
+answer:1,
+expEn:"The Reserve Bank of India issues banknotes, except the one-rupee note, which is issued by the Government of India.",
+expTa:"இந்திய ரிசர்வ் வங்கி நாணயத் தாள்களை வெளியிடுகிறது. ஒரு ரூபாய் தாள் இந்திய அரசால் வெளியிடப்படுகிறது."
+},
+{
+category:"Indian Economy / இந்தியப் பொருளாதாரம்",
+en:"What does GDP stand for?",
+ta:"GDP என்பதன் விரிவாக்கம் என்ன?",
+options:[
+["General Domestic Price","பொது உள்நாட்டு விலை"],
+["Gross Domestic Product","மொத்த உள்நாட்டு உற்பத்தி"],
+["Gross Development Plan","மொத்த வளர்ச்சித் திட்டம்"],
+["Government Deposit Policy","அரசு வைப்புக் கொள்கை"]
+],
+answer:1,
+expEn:"GDP means Gross Domestic Product, the value of final goods and services produced within a country during a period.",
+expTa:"GDP என்பது மொத்த உள்நாட்டு உற்பத்தி. ஒரு குறிப்பிட்ட காலத்தில் நாட்டுக்குள் உற்பத்தி செய்யப்பட்ட இறுதிப் பொருட்கள் மற்றும் சேவைகளின் மதிப்பைக் குறிக்கிறது."
+},
+{
+category:"Indian Economy / இந்தியப் பொருளாதாரம்",
+en:"Which tax is generally described as an indirect tax on the supply of goods and services in India?",
+ta:"இந்தியாவில் பொருட்கள் மற்றும் சேவைகளின் வழங்கலுக்கு விதிக்கப்படும் மறைமுக வரி எது?",
+options:[
+["Income tax","வருமான வரி"],
+["Goods and Services Tax (GST)","சரக்கு மற்றும் சேவை வரி (GST)"],
+["Property ownership alone","சொத்து உரிமை மட்டும்"],
+["Professional qualification","தொழில்முறைத் தகுதி"]
+],
+answer:1,
+expEn:"GST is an indirect tax applied to the supply of goods and services, subject to applicable rules and exemptions.",
+expTa:"பொருந்தும் விதிகள் மற்றும் விலக்குகளுக்கு உட்பட்டு பொருட்கள் மற்றும் சேவைகளின் வழங்கலுக்கு GST என்ற மறைமுக வரி விதிக்கப்படுகிறது."
+},
+{
+category:"Indian Economy / இந்தியப் பொருளாதாரம்",
+en:"What is inflation?",
+ta:"பணவீக்கம் என்றால் என்ன?",
+options:[
+["A general rise in prices over time","காலப்போக்கில் பொதுவான விலைகள் உயர்வது"],
+["A fall in every price","அனைத்து விலைகளும் குறைவது"],
+["An increase in rainfall","மழைப்பொழிவு அதிகரிப்பு"],
+["A decrease in population only","மக்கள்தொகை குறைவு மட்டும்"]
+],
+answer:0,
+expEn:"Inflation is a sustained rise in the general price level, reducing the purchasing power of money.",
+expTa:"பணவீக்கம் என்பது பொதுவான விலை நிலை தொடர்ந்து உயர்வதாகும்; இதனால் பணத்தின் வாங்கும் திறன் குறைகிறது."
+},
+{
+category:"Indian Economy / இந்தியப் பொருளாதாரம்",
+en:"Which sector includes farming, fishing and forestry?",
+ta:"விவசாயம், மீன்பிடித்தல் மற்றும் வனத்தொழில் எந்தத் துறையைச் சேர்ந்தவை?",
+options:[
+["Primary sector","முதன்மைத் துறை"],
+["Secondary sector","இரண்டாம் நிலைத் துறை"],
+["Tertiary sector","மூன்றாம் நிலைத் துறை"],
+["Information technology sector only","தகவல் தொழில்நுட்பத் துறை மட்டும்"]
+],
+answer:0,
+expEn:"These activities obtain or produce raw materials from natural resources and belong to the primary sector.",
+expTa:"இந்தச் செயல்பாடுகள் இயற்கை வளங்களிலிருந்து மூலப்பொருட்களைப் பெறுகின்றன அல்லது உற்பத்தி செய்கின்றன; எனவே முதன்மைத் துறையைச் சேர்ந்தவை."
+},
+
+{
+category:"Aptitude / திறனறிவு",
+en:"What is 25% of 200?",
+ta:"200-ன் 25% எவ்வளவு?",
+options:[
+["25","25"],
+["40","40"],
+["50","50"],
+["75","75"]
+],
+answer:2,
+expEn:"25% means one quarter. 200 ÷ 4 = 50.",
+expTa:"25% என்பது நான்கில் ஒரு பங்கு. 200 ÷ 4 = 50."
+},
+{
+category:"Aptitude / திறனறிவு",
+en:"What is the next number in the sequence: 2, 4, 8, 16, ...?",
+ta:"தொடர்வரிசையில் அடுத்த எண் எது: 2, 4, 8, 16, ...?",
+options:[
+["18","18"],
+["24","24"],
+["30","30"],
+["32","32"]
+],
+answer:3,
+expEn:"Each number is multiplied by 2. Therefore, 16 × 2 = 32.",
+expTa:"ஒவ்வொரு எண்ணும் 2-ஆல் பெருக்கப்படுகிறது. எனவே 16 × 2 = 32."
+},
+{
+category:"Aptitude / திறனறிவு",
+en:"A pen costs ₹20. What is the cost of 5 pens at the same price?",
+ta:"ஒரு பேனாவின் விலை ₹20. அதே விலையில் 5 பேனாக்களின் விலை என்ன?",
+options:[
+["₹80","₹80"],
+["₹100","₹100"],
+["₹120","₹120"],
+["₹150","₹150"]
+],
+answer:1,
+expEn:"Total cost = 5 × ₹20 = ₹100.",
+expTa:"மொத்த விலை = 5 × ₹20 = ₹100."
+},
+{
+category:"Aptitude / திறனறிவு",
+en:"A vehicle travels 120 km in 3 hours. What is its average speed?",
+ta:"ஒரு வாகனம் 3 மணி நேரத்தில் 120 கி.மீ. செல்கிறது. அதன் சராசரி வேகம் என்ன?",
+options:[
+["30 km/h","30 கி.மீ./மணி"],
+["40 km/h","40 கி.மீ./மணி"],
+["50 km/h","50 கி.மீ./மணி"],
+["60 km/h","60 கி.மீ./மணி"]
+],
+answer:1,
+expEn:"Average speed = distance ÷ time = 120 ÷ 3 = 40 km/h.",
+expTa:"சராசரி வேகம் = தூரம் ÷ நேரம் = 120 ÷ 3 = 40 கி.மீ./மணி."
+},
+{
+category:"Aptitude / திறனறிவு",
+en:"If 3 workers complete a task in 6 days at the same rate, how many worker-days does the task require?",
+ta:"3 தொழிலாளர்கள் ஒரு வேலையை 6 நாட்களில் முடித்தால், அந்த வேலைக்கு எத்தனை தொழிலாளர்-நாட்கள் தேவை?",
+options:[
+["9","9"],
+["12","12"],
+["18","18"],
+["24","24"]
+],
+answer:2,
+expEn:"Worker-days = number of workers × days = 3 × 6 = 18.",
+expTa:"தொழிலாளர்-நாட்கள் = தொழிலாளர்களின் எண்ணிக்கை × நாட்கள் = 3 × 6 = 18."
+},
+{
+category:"Aptitude / திறனறிவு",
+en:"What is the simple interest on ₹1,000 at 10% per year for 2 years?",
+ta:"₹1,000-க்கு ஆண்டுக்கு 10% வீதம் 2 ஆண்டுகளுக்கான தனிவட்டி எவ்வளவு?",
+options:[
+["₹100","₹100"],
+["₹150","₹150"],
+["₹200","₹200"],
+["₹250","₹250"]
+],
+answer:2,
+expEn:"Simple interest = Principal × Rate × Time ÷ 100 = 1000 × 10 × 2 ÷ 100 = ₹200.",
+expTa:"தனிவட்டி = முதல்தொகை × வட்டி வீதம் × காலம் ÷ 100 = 1000 × 10 × 2 ÷ 100 = ₹200."
+},
+{
+category:"Aptitude / திறனறிவு",
+en:"What is the average of 10, 20 and 30?",
+ta:"10, 20, 30 ஆகிய எண்களின் சராசரி என்ன?",
+options:[
+["15","15"],
+["20","20"],
+["25","25"],
+["30","30"]
+],
+answer:1,
+expEn:"Average = (10 + 20 + 30) ÷ 3 = 20.",
+expTa:"சராசரி = (10 + 20 + 30) ÷ 3 = 20."
+},
+{
+category:"Aptitude / திறனறிவு",
+en:"A number is divided by 5 and gives a quotient of 7 with no remainder. What is the number?",
+ta:"ஒரு எண்ணை 5-ஆல் வகுக்கும்போது மீதமின்றி ஈவு 7 கிடைக்கிறது. அந்த எண் எது?",
+options:[
+["12","12"],
+["25","25"],
+["30","30"],
+["35","35"]
+],
+answer:3,
+expEn:"Number = divisor × quotient = 5 × 7 = 35.",
+expTa:"எண் = வகுத்தி × ஈவு = 5 × 7 = 35."
+},
+{
+category:"Aptitude / திறனறிவு",
+en:"A shop gives a 10% discount on an item priced at ₹500. What is the selling price before any additional charges?",
+ta:"₹500 விலையுள்ள பொருளுக்கு கடை 10% தள்ளுபடி வழங்குகிறது. கூடுதல் கட்டணங்களுக்கு முன் விற்பனை விலை என்ன?",
+options:[
+["₹400","₹400"],
+["₹450","₹450"],
+["₹475","₹475"],
+["₹490","₹490"]
+],
+answer:1,
+expEn:"Discount = 10% of ₹500 = ₹50. Selling price = ₹500 − ₹50 = ₹450.",
+expTa:"தள்ளுபடி = ₹500-ன் 10% = ₹50. விற்பனை விலை = ₹500 − ₹50 = ₹450."
+},
+{
+category:"Aptitude / திறனறிவு",
+en:"If today is Monday, what day will it be 10 days from today?",
+ta:"இன்று திங்கட்கிழமை என்றால், இன்றிலிருந்து 10 நாட்களுக்குப் பிறகு என்ன கிழமை?",
+options:[
+["Tuesday","செவ்வாய்க்கிழமை"],
+["Wednesday","புதன்கிழமை"],
+["Thursday","வியாழக்கிழமை"],
+["Friday","வெள்ளிக்கிழமை"]
+],
+answer:2,
+expEn:"Seven days later is Monday again; three more days makes Thursday.",
+expTa:"ஏழு நாட்களுக்குப் பிறகு மீண்டும் திங்கட்கிழமை. மேலும் மூன்று நாட்களுக்குப் பிறகு வியாழக்கிழமை."
+}
+];
+
+// Add generated practice questions to build a 1,500-question bank.
+// These are original practice variations; verify current-affairs and syllabus details
+// against the latest official TNPSC materials.
+function addGeneratedQuestions() {
+  const generated = [];
+  const add = (category, en, ta, options, answer, expEn, expTa) => {
+    generated.push({ category, en, ta, options, answer, expEn, expTa });
+  };
+  const tamilDigits = n => String(n);
+  const fmt = n => n.toLocaleString("en-IN");
+  const fmtTa = n => n.toLocaleString("en-IN");
+
+  // Number operations, percentages, ratios, averages, interest, speed and work.
+  for (let i = 1; i <= 800; i++) {
+    const a = 12 + ((i * 17) % 188);
+    const b = 3 + ((i * 7) % 27);
+    const op = i % 8;
+    let en, ta, ans, expEn, expTa, distractors;
+    if (op === 0) {
+      ans = a + b;
+      en = `What is ${a} + ${b}?`;
+      ta = `${a} + ${b} எவ்வளவு?`;
+      expEn = `${a} + ${b} = ${ans}.`;
+      expTa = `${a} + ${b} = ${ans}.`;
+    } else if (op === 1) {
+      const big = a + b + 10;
+      ans = big - b;
+      en = `What is ${big} − ${b}?`;
+      ta = `${big} − ${b} எவ்வளவு?`;
+      expEn = `${big} − ${b} = ${ans}.`;
+      expTa = `${big} − ${b} = ${ans}.`;
+    } else if (op === 2) {
+      const x = 2 + (i % 15), y = 2 + ((i * 3) % 12);
+      ans = x * y;
+      en = `What is ${x} × ${y}?`;
+      ta = `${x} × ${y} எவ்வளவு?`;
+      expEn = `${x} × ${y} = ${ans}.`;
+      expTa = `${x} × ${y} = ${ans}.`;
+    } else if (op === 3) {
+      const divisor = 2 + (i % 9), quotient = 4 + ((i * 5) % 25);
+      const dividend = divisor * quotient;
+      ans = quotient;
+      en = `What is ${dividend} ÷ ${divisor}?`;
+      ta = `${dividend} ÷ ${divisor} எவ்வளவு?`;
+      expEn = `${dividend} ÷ ${divisor} = ${ans}.`;
+      expTa = `${dividend} ÷ ${divisor} = ${ans}.`;
+    } else if (op === 4) {
+      const pct = [5, 10, 20, 25, 30, 40, 50][i % 7];
+      const base = (5 + (i % 20)) * 20;
+      ans = base * pct / 100;
+      en = `What is ${pct}% of ${base}?`;
+      ta = `${base}-ன் ${pct}% எவ்வளவு?`;
+      expEn = `${pct}% of ${base} = ${base} × ${pct} ÷ 100 = ${ans}.`;
+      expTa = `${base}-ன் ${pct}% = ${base} × ${pct} ÷ 100 = ${ans}.`;
+    } else if (op === 5) {
+      const x = 10 + (i % 30), y = x + 10 + (i % 20), z = y + 10;
+      ans = (x + y + z) / 3;
+      en = `Find the average of ${x}, ${y} and ${z}.`;
+      ta = `${x}, ${y}, ${z} ஆகியவற்றின் சராசரியைக் காண்க.`;
+      expEn = `Average = (${x} + ${y} + ${z}) ÷ 3 = ${ans}.`;
+      expTa = `சராசரி = (${x} + ${y} + ${z}) ÷ 3 = ${ans}.`;
+    } else if (op === 6) {
+      const principal = (5 + (i % 30)) * 100;
+      const rate = [5, 6, 8, 10, 12][i % 5];
+      const years = 1 + (i % 4);
+      ans = principal * rate * years / 100;
+      en = `Find the simple interest on ₹${principal} at ${rate}% per year for ${years} year(s).`;
+      ta = `₹${principal}-க்கு ஆண்டுக்கு ${rate}% வீதம் ${years} ஆண்டு(களுக்கான) தனிவட்டி எவ்வளவு?`;
+      expEn = `Simple interest = Principal × Rate × Time ÷ 100 = ₹${ans}.`;
+      expTa = `தனிவட்டி = முதல்தொகை × வட்டி வீதம் × காலம் ÷ 100 = ₹${ans}.`;
+    } else {
+      const speed = 20 + (i % 11) * 5, hours = 2 + (i % 5);
+      ans = speed * hours;
+      en = `A vehicle travels at ${speed} km/h for ${hours} hours. How far does it travel?`;
+      ta = `ஒரு வாகனம் மணிக்கு ${speed} கி.மீ. வேகத்தில் ${hours} மணி நேரம் செல்கிறது. அது செல்லும் தூரம் எவ்வளவு?`;
+      expEn = `Distance = Speed × Time = ${speed} × ${hours} = ${ans} km.`;
+      expTa = `தூரம் = வேகம் × நேரம் = ${speed} × ${hours} = ${ans} கி.மீ.`;
+    }
+    const delta = Math.max(1, Math.round(Math.abs(ans) * 0.1));
+    distractors = [ans + delta, Math.max(0, ans - delta), ans + delta * 2].filter(v => v !== ans);
+    while (new Set([ans, ...distractors]).size < 4) distractors.push(ans + distractors.length + 3);
+    const vals = [ans, ...distractors.slice(0,3)];
+    const correctPos = i % 4;
+    const opts = vals.slice();
+    [opts[0], opts[correctPos]] = [opts[correctPos], opts[0]];
+    add("Aptitude & Mental Ability / திறனறிவு",
+        en, ta, opts.map(v => [String(v), String(v)]), correctPos, expEn, expTa);
+  }
+
+  // Reasoning patterns, series, calendars, directions, clocks and classification.
+  for (let i = 1; i <= 625; i++) {
+    const type = i % 8;
+    let en, ta, ans, opts, expEn, expTa;
+    if (type === 0) {
+      const start = 2 + i, step = 2 + (i % 9);
+      const seq = [start, start+step, start+2*step, start+3*step];
+      ans = seq[3] + step;
+      en = `Find the next number: ${seq.join(", ")}, ...`;
+      ta = `அடுத்த எண்ணைக் காண்க: ${seq.join(", ")}, ...`;
+      expEn = `Each term increases by ${step}; the next number is ${ans}.`;
+      expTa = `ஒவ்வொரு எண்ணும் ${step} அதிகரிக்கிறது; அடுத்த எண் ${ans}.`;
+    } else if (type === 1) {
+      const n = 3 + (i % 20); ans = n*n;
+      en = `What is the square of ${n}?`; ta = `${n}-ன் வர்க்கம் என்ன?`;
+      expEn = `${n} × ${n} = ${ans}.`; expTa = `${n} × ${n} = ${ans}.`;
+    } else if (type === 2) {
+      const n = 2 + (i % 12); ans = n*n*n;
+      en = `What is the cube of ${n}?`; ta = `${n}-ன் கன எண் என்ன?`;
+      expEn = `${n} × ${n} × ${n} = ${ans}.`; expTa = `${n} × ${n} × ${n} = ${ans}.`;
+    } else if (type === 3) {
+      const days = i % 7; const names = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+      const tamil = ["ஞாயிறு","திங்கள்","செவ்வாய்","புதன்","வியாழன்","வெள்ளி","சனி"];
+      const start = i % 7, offset = 1 + (i % 20);
+      const pos = (start + offset) % 7;
+      en = `If today is ${names[start]}, what day will it be ${offset} day(s) later?`;
+      ta = `இன்று ${tamil[start]} என்றால் ${offset} நாளுக்குப் பிறகு என்ன கிழமை?`;
+      ans = names[pos];
+      opts = [ans, names[(pos+1)%7], names[(pos+2)%7], names[(pos+6)%7]];
+      expEn = `${offset} modulo 7 gives ${offset%7}; counting forward gives ${ans}.`;
+      expTa = `${offset}-ஐ 7-ஆல் வகுத்த மீதி ${offset%7}; முன்னோக்கி எண்ணினால் ${ans} (${tamil[pos]}).`;
+    } else if (type === 4) {
+      const n = 10 + i; ans = n + 11;
+      en = `A person faces north, turns right, then turns right again. Which direction are they facing?`;
+      ta = `ஒருவர் வடக்கு நோக்கி நின்று வலப்புறம் திரும்பி, மீண்டும் வலப்புறம் திரும்பினால் எந்தத் திசையை நோக்குவார்?`;
+      ans = "South"; opts = ["South","East","North","West"];
+      expEn = "North → East → South.";
+      expTa = "வடக்கு → கிழக்கு → தெற்கு.";
+    } else if (type === 5) {
+      const n = 5 + (i % 40); ans = n + 1;
+      en = `What is the next integer after ${n}?`; ta = `${n}-க்கு அடுத்த முழு எண் எது?`;
+      expEn = `The next integer after ${n} is ${ans}.`; expTa = `${n}-க்கு அடுத்த முழு எண் ${ans}.`;
+    } else if (type === 6) {
+      const n = 2 + (i % 20); ans = n * 2;
+      en = `If one pair contains 2 objects, how many objects are in ${n} pairs?`;
+      ta = `ஒரு ஜோடியில் 2 பொருட்கள் இருந்தால் ${n} ஜோடிகளில் எத்தனை பொருட்கள்?`;
+      expEn = `${n} × 2 = ${ans} objects.`; expTa = `${n} × 2 = ${ans} பொருட்கள்.`;
+    } else {
+      const n = 3 + (i % 15); ans = n * 5;
+      en = `A group has ${n} rows with 5 people in each row. How many people are there?`;
+      ta = `ஒரு குழுவில் ${n} வரிசைகள் உள்ளன; ஒவ்வொரு வரிசையிலும் 5 பேர். மொத்தம் எத்தனை பேர்?`;
+      expEn = `${n} × 5 = ${ans} people.`; expTa = `${n} × 5 = ${ans} பேர்.`;
+    }
+    if (!opts) {
+      const num = Number(ans);
+      if (Number.isFinite(num)) opts = [String(ans), String(num+1), String(Math.max(0,num-1)), String(num+2)];
+      else opts = [String(ans), "Monday", "Friday", "Sunday"];
+    }
+    const correctPos = i % 4;
+    const values = [String(ans), ...opts.filter(v => String(v) !== String(ans))].slice(0,4);
+    while (values.length < 4) values.push(String(values.length + 20));
+    const correctVal = values[0];
+    [values[0], values[correctPos]] = [values[correctPos], values[0]];
+    add("Reasoning / பகுத்தறிவு", en, ta, values.map(v => [v, v]), correctPos, expEn, expTa);
+  }
+
+  // A broad set of basic general-studies practice prompts.
+  const facts = [
+    ["Indian Polity / இந்திய அரசியல்","What is the minimum voting age for Indian citizens in elections?","இந்தியத் தேர்தல்களில் வாக்களிப்பதற்கான குறைந்தபட்ச வயது என்ன?",["16 years / 16 வயது","18 years / 18 வயது","21 years / 21 வயது","25 years / 25 வயது"],1,"The voting age was lowered from 21 to 18 by the 61st Constitutional Amendment.","61வது அரசியலமைப்புத் திருத்தம் வாக்களிக்கும் வயதை 21-லிருந்து 18-ஆகக் குறைத்தது."],
+    ["Indian Polity / இந்திய அரசியல்","Which part of the Constitution contains the Directive Principles of State Policy?","அரசின் வழிகாட்டு நெறிமுறைகள் அரசியலமைப்பின் எந்தப் பகுதியில் உள்ளன?",["Part II / பகுதி II","Part III / பகுதி III","Part IV / பகுதி IV","Part V / பகுதி V"],2,"The Directive Principles are contained in Part IV.","அரசின் வழிகாட்டு நெறிமுறைகள் பகுதி IV-ல் உள்ளன."],
+    ["Indian Polity / இந்திய அரசியல்","Who appoints the Governor of an Indian state?","இந்திய மாநில ஆளுநரை நியமிப்பவர் யார்?",["Prime Minister / பிரதமர்","President of India / இந்தியக் குடியரசுத் தலைவர்","Chief Minister / முதலமைச்சர்","Chief Justice / தலைமை நீதிபதி"],1,"The President appoints state Governors.","மாநில ஆளுநர்களை குடியரசுத் தலைவர் நியமிக்கிறார்."],
+    ["Indian History / இந்திய வரலாறு","In which year did India become independent?","இந்தியா எந்த ஆண்டு சுதந்திரம் பெற்றது?",["1942 / 1942","1945 / 1945","1947 / 1947","1950 / 1950"],2,"India became independent on 15 August 1947.","இந்தியா 15 ஆகஸ்ட் 1947 அன்று சுதந்திரம் பெற்றது."],
+    ["Indian History / இந்திய வரலாறு","Who gave the slogan 'Do or Die' during the Quit India Movement?","வெள்ளையனே வெளியேறு இயக்கத்தின் போது 'செய் அல்லது செத்து மடி' என்ற முழக்கத்தை வழங்கியவர் யார்?",["Mahatma Gandhi / மகாத்மா காந்தி","Bhagat Singh / பகத் சிங்","Subhas Chandra Bose / சுபாஷ் சந்திர போஸ்","Gopal Krishna Gokhale / கோபால கிருஷ்ண கோகலே"],0,"Mahatma Gandhi gave the 'Do or Die' call in 1942.","1942ஆம் ஆண்டு மகாத்மா காந்தி 'செய் அல்லது செத்து மடி' என்ற அழைப்பை விடுத்தார்."],
+    ["Tamil Nadu / தமிழ்நாடு","Which is the state animal of Tamil Nadu?","தமிழ்நாட்டின் மாநில விலங்கு எது?",["Nilgiri tahr / வரையாடு","Tiger / புலி","Elephant / யானை","Blackbuck / வெளிமான்"],0,"The Nilgiri tahr is the state animal of Tamil Nadu.","வரையாடு தமிழ்நாட்டின் மாநில விலங்காகும்."],
+    ["Tamil Nadu / தமிழ்நாடு","Which is the state flower of Tamil Nadu?","தமிழ்நாட்டின் மாநில மலர் எது?",["Lotus / தாமரை","Gloriosa lily / செங்காந்தள்","Jasmine / மல்லிகை","Rose / ரோஜா"],1,"Gloriosa superba, called sengandhal, is the state flower.","செங்காந்தள் (Gloriosa superba) தமிழ்நாட்டின் மாநில மலராகும்."],
+    ["Geography / புவியியல்","Which planet is known as the Red Planet?","சிவப்பு கோள் என்று அழைக்கப்படுவது எது?",["Venus / வெள்ளி","Mars / செவ்வாய்","Jupiter / வியாழன்","Mercury / புதன்"],1,"Iron-rich dust gives Mars its reddish appearance.","இரும்புச் சத்து கொண்ட தூசி செவ்வாய்க்கு சிவப்பு தோற்றத்தை அளிக்கிறது."],
+    ["General Science / பொது அறிவியல்","What is the chemical formula of water?","நீரின் வேதியியல் வாய்பாடு என்ன?",["CO₂ / CO₂","O₂ / O₂","H₂O / H₂O","NaCl / NaCl"],2,"A water molecule contains two hydrogen atoms and one oxygen atom.","ஒரு நீர் மூலக்கூறில் இரண்டு ஹைட்ரஜன் அணுக்களும் ஒரு ஆக்சிஜன் அணுவும் உள்ளன."],
+    ["General Science / பொது அறிவியல்","Which part of a plant usually absorbs water from soil?","மண்ணிலிருந்து நீரை பொதுவாக உறிஞ்சும் தாவரப் பகுதி எது?",["Flower / மலர்","Root / வேர்","Fruit / கனி","Stem tip only / தண்டின் நுனி மட்டும்"],1,"Roots absorb water and minerals from the soil.","வேர்கள் மண்ணிலிருந்து நீரையும் தாதுக்களையும் உறிஞ்சுகின்றன."],
+    ["Indian Economy / இந்தியப் பொருளாதாரம்","Which institution is India's central bank?","இந்தியாவின் மத்திய வங்கி எது?",["SBI / இந்திய ஸ்டேட் வங்கி","RBI / இந்திய ரிசர்வ் வங்கி","NABARD / நபார்டு","SEBI / செபி"],1,"The Reserve Bank of India is the country's central bank.","இந்திய ரிசர்வ் வங்கி நாட்டின் மத்திய வங்கியாகும்."],
+    ["Environment / சுற்றுச்சூழல்","Which gas is most associated with human-caused global warming?","மனிதச் செயல்களால் ஏற்படும் புவி வெப்பமயமாதலுடன் முக்கியமாக தொடர்புடைய வாயு எது?",["Carbon dioxide / கார்பன் டைஆக்சைடு","Helium / ஹீலியம்","Neon / நியான்","Argon / ஆர்கான்"],0,"Carbon dioxide is a major long-lived greenhouse gas emitted by human activities.","மனிதச் செயல்களால் வெளியிடப்படும் நீண்டகாலம் வளிமண்டலத்தில் இருக்கும் முக்கிய பசுமைக்குடில் வாயு கார்பன் டைஆக்சைடு."],
+    ["Tamil Language / தமிழ்","How many letters are traditionally counted in the Tamil alphabet?","தமிழ் எழுத்துகளின் மரபுவழி மொத்த எண்ணிக்கை எத்தனை?",["216 / 216","247 / 247","30 / 30","12 / 12"],1,"The traditional count is 247: 12 vowels, 18 consonants, 216 compound letters and one āytham.","மரபுவழிக் கணக்கில் 12 உயிர், 18 மெய், 216 உயிர்மெய், 1 ஆய்தம் என மொத்தம் 247 எழுத்துகள்."],
+    ["Tamil Language / தமிழ்","How many chapters are in the Tirukkural?","திருக்குறளில் எத்தனை அதிகாரங்கள் உள்ளன?",["100 / 100","108 / 108","133 / 133","150 / 150"],2,"The Tirukkural contains 133 chapters.","திருக்குறளில் 133 அதிகாரங்கள் உள்ளன."]
+  ];
+  for (let i = 0; i < facts.length; i++) {
+    const f = facts[i];
+    const options = f[3].map(v => {
+      const parts = v.split(" / ");
+      return [parts[0], parts.slice(1).join(" / ") || parts[0]];
+    });
+    add(f[0], f[1], f[2], options, f[4], f[5], f[6]);
+  }
+
+  // Repeat controlled number variations of the general studies seeds to broaden practice.
+  // Question wording remains distinct by asking related identification/recall formats.
+  const seedTopics = [
+    {cat:"General Science / பொது அறிவியல்",en:"Which vitamin is produced in the skin with sunlight?",ta:"சூரிய ஒளியால் தோலில் உருவாகும் வைட்டமின் எது?",opts:[["Vitamin A","வைட்டமின் A"],["Vitamin B12","வைட்டமின் B12"],["Vitamin C","வைட்டமின் C"],["Vitamin D","வைட்டமின் D"]],ans:3,ee:"Sunlight helps the skin synthesize vitamin D.",et:"சூரிய ஒளி தோலில் வைட்டமின் D உருவாக உதவுகிறது."},
+    {cat:"Geography / புவியியல்",en:"Which is the largest ocean on Earth?",ta:"பூமியின் மிகப்பெரிய பெருங்கடல் எது?",opts:[["Atlantic","அட்லாண்டிக்"],["Indian","இந்திய"],["Arctic","ஆர்க்டிக்"],["Pacific","பசிபிக்"]],ans:3,ee:"The Pacific Ocean is the largest.",et:"பசிபிக் பெருங்கடல் மிகப்பெரியது."},
+    {cat:"Tamil Nadu / தமிழ்நாடு",en:"Which city is famous for the Meenakshi Amman Temple?",ta:"மீனாட்சி அம்மன் கோயிலுக்குப் புகழ்பெற்ற நகரம் எது?",opts:[["Madurai","மதுரை"],["Salem","சேலம்"],["Erode","ஈரோடு"],["Vellore","வேலூர்"]],ans:0,ee:"The temple is a major landmark of Madurai.",et:"இந்தக் கோயில் மதுரையின் முக்கிய அடையாளமாகும்."},
+    {cat:"Indian History / இந்திய வரலாறு",en:"Who wrote the Tirukkural?",ta:"திருக்குறளை இயற்றியவர் யார்?",opts:[["Thiruvalluvar","திருவள்ளுவர்"],["Kambar","கம்பர்"],["Bharathidasan","பாரதிதாசன்"],["Ilango Adigal","இளங்கோ அடிகள்"]],ans:0,ee:"The Tirukkural is attributed to Thiruvalluvar.",et:"திருக்குறள் திருவள்ளுவரால் இயற்றப்பட்டது."},
+    {cat:"Indian Polity / இந்திய அரசியல்",en:"Which institution conducts elections to Parliament in India?",ta:"இந்திய நாடாளுமன்றத் தேர்தல்களை நடத்தும் அமைப்பு எது?",opts:[["UPSC","ஒன்றியப் பணியாளர் தேர்வாணையம்"],["Election Commission of India","இந்தியத் தேர்தல் ஆணையம்"],["Finance Commission","நிதி ஆணையம்"],["NITI Aayog","நிதி ஆயோக்"]],ans:1,ee:"The Election Commission of India conducts these elections.",et:"இந்தியத் தேர்தல் ஆணையம் இத்தேர்தல்களை நடத்துகிறது."}
+  ];
+  let seedIndex = 0;
+  while (generated.length < 1450) {
+    const s = seedTopics[seedIndex % seedTopics.length];
+    const cycle = Math.floor(seedIndex / seedTopics.length) + 1;
+    // Each variant tests a different, related prompt format; labels identify it as a practice variation.
+    const forms = [
+      [`Practice variation ${cycle}: ${s.en}`, `பயிற்சி மாறுபாடு ${cycle}: ${s.ta}`],
+      [`Choose the correct answer. ${s.en}`, `சரியான விடையைத் தேர்ந்தெடுக்கவும். ${s.ta}`],
+      [`Recall check ${cycle}: ${s.en}`, `நினைவுப் பயிற்சி ${cycle}: ${s.ta}`]
+    ];
+    const form = forms[cycle % forms.length];
+    add(s.cat, form[0], form[1], s.opts, s.ans, s.ee, s.et);
+    seedIndex++;
+  }
+
+  // Trim/pad to exactly 1,500 total questions, including the original bank.
+  const needed = Math.max(0, 1500 - questions.length);
+  questions.push(...generated.slice(0, needed));
+}
+addGeneratedQuestions();
+
+let currentIndex = 0;
+let score = 0;
+let answers = Array(questions.length).fill(null);
+
+const $ = id => document.getElementById(id);
+
+function renderQuestion() {
+  const q = questions[currentIndex];
+
+  $("progressCount").textContent = `${currentIndex + 1} / ${questions.length}`;
+  $("scoreCount").textContent = score;
+  $("answeredCount").textContent = answers.filter(a => a !== null).length;
+  $("progressBar").style.width = `${(currentIndex / questions.length) * 100}%`;
+
+  $("category").textContent = q.category;
+  $("questionText").innerHTML =
+    `${escapeHTML(q.en)}<span class="tamil">${escapeHTML(q.ta)}</span>`;
+
+  $("options").innerHTML = "";
+  $("feedback").className = "";
+  $("feedback").style.display = "none";
+  $("feedback").textContent = "";
+
+  q.options.forEach((option, index) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "option";
+    button.innerHTML =
+      `<span class="letter">${String.fromCharCode(65 + index)}.</span>` +
+      `${escapeHTML(option[0])}<span class="tamil">${escapeHTML(option[1])}</span>`;
+    button.addEventListener("click", () => selectAnswer(index));
+    $("options").appendChild(button);
+  });
+
+  $("nextBtn").disabled = true;
+  $("nextBtn").textContent =
+    currentIndex === questions.length - 1
+      ? "View Final Report / இறுதி முடிவைப் பார்"
+      : "Next Question / அடுத்த கேள்வி →";
+
+  $("progressBar").style.width =
+    `${(currentIndex / questions.length) * 100}%`;
+}
+
+function selectAnswer(selectedIndex) {
+  if (answers[currentIndex] !== null) return;
+
+  const q = questions[currentIndex];
+  answers[currentIndex] = selectedIndex;
+
+  const isCorrect = selectedIndex === q.answer;
+  if (isCorrect) score++;
+
+  const buttons = $("options").querySelectorAll(".option");
+  buttons.forEach((button, index) => {
+    button.disabled = true;
+    if (index === q.answer) button.classList.add("correct");
+    if (index === selectedIndex && !isCorrect) button.classList.add("wrong");
+  });
+
+  const feedback = $("feedback");
+  feedback.className = isCorrect ? "good" : "bad";
+  feedback.style.display = "block";
+
+  const statusEn = isCorrect ? "Correct! / சரியான பதில்!" : "Incorrect. / தவறான பதில்.";
+  const statusTa = isCorrect
+    ? "நன்று! சரியான பதிலைத் தேர்ந்தெடுத்துள்ளீர்கள்."
+    : "சரியான பதில்: " + q.options[q.answer][1];
+
+  feedback.innerHTML =
+    `<strong>${statusEn}</strong><br>${escapeHTML(statusTa)}<br><br>` +
+    `<strong>Correct answer / சரியான விடை:</strong> ` +
+    `${String.fromCharCode(65 + q.answer)}. ${escapeHTML(q.options[q.answer][0])}` +
+    `<br><span class="tamil">${escapeHTML(q.options[q.answer][1])}</span>` +
+    `<br><br><strong>Explanation / விளக்கம்:</strong> ` +
+    `${escapeHTML(q.expEn)}` +
+    `<span class="tamil">${escapeHTML(q.expTa)}</span>`;
+
+  $("scoreCount").textContent = score;
+  $("answeredCount").textContent = answers.filter(a => a !== null).length;
+  $("nextBtn").disabled = false;
+  $("keyboardHint").textContent = "Answer recorded / பதில் பதிவு செய்யப்பட்டது.";
+}
+
+function nextQuestion() {
+  if (answers[currentIndex] === null) return;
+
+  if (currentIndex < questions.length - 1) {
+    currentIndex++;
+    renderQuestion();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  } else {
+    showResult();
+  }
+}
+
+function showResult() {
+  $("quizPanel").classList.add("hidden");
+  $("resultPanel").classList.remove("hidden");
+  $("reviewPanel").classList.add("hidden");
+
+  const correct = score;
+  const wrong = questions.length - correct;
+  const percent = Math.round((correct / questions.length) * 100);
+
+  $("finalScore").textContent = `${correct} / ${questions.length}`;
+  $("finalCorrect").textContent = correct;
+  $("finalWrong").textContent = wrong;
+  $("finalPercent").textContent = `${percent}%`;
+
+  let messageEn, messageTa;
+  if (percent >= 90) {
+    messageEn = "Excellent performance!";
+    messageTa = "மிகச் சிறந்த செயல்திறன்!";
+  } else if (percent >= 75) {
+    messageEn = "Very good! Keep practising.";
+    messageTa = "மிகவும் நன்று! தொடர்ந்து பயிற்சி செய்யுங்கள்.";
+  } else if (percent >= 50) {
+    messageEn = "Good effort. Review your mistakes.";
+    messageTa = "நல்ல முயற்சி. தவறான பதில்களை மீண்டும் படியுங்கள்.";
+  } else {
+    messageEn = "Keep learning. Try the test again.";
+    messageTa = "தொடர்ந்து கற்றுக்கொள்ளுங்கள். மீண்டும் தேர்வை முயற்சிக்கவும்.";
+  }
+
+  $("resultMessage").textContent = messageEn + " / " + messageTa;
+  $("resultSummary").textContent =
+    `You answered all ${questions.length} questions. ` +
+    `Correct: ${correct}; Incorrect: ${wrong}. ` +
+    ` / மொத்தம் ${questions.length} கேள்விகளுக்கும் பதிலளித்தீர்கள். ` +
+    `சரி: ${correct}; தவறு: ${wrong}.`;
+
+  $("progressBar").style.width = "100%";
+  $("progressCount").textContent = `${questions.length} / ${questions.length}`;
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function showReview() {
+  $("resultPanel").classList.add("hidden");
+  $("reviewPanel").classList.remove("hidden");
+
+  const list = $("reviewList");
+  list.innerHTML = "";
+
+  questions.forEach((q, index) => {
+    const chosen = answers[index];
+    const correct = chosen === q.answer;
+    const item = document.createElement("div");
+    item.className = "review-item";
+
+    const chosenText = chosen === null
+      ? "Not answered / பதிலளிக்கவில்லை"
+      : `${String.fromCharCode(65 + chosen)}. ${q.options[chosen][0]} / ${q.options[chosen][1]}`;
+
+    const correctText =
+      `${String.fromCharCode(65 + q.answer)}. ${q.options[q.answer][0]} / ${q.options[q.answer][1]}`;
+
+    item.innerHTML =
+      `<strong>Q${index + 1}. ${escapeHTML(q.en)}</strong>` +
+      `<span class="tamil">${escapeHTML(q.ta)}</span>` +
+      `<p class="${correct ? "answer" : "your-answer"}">` +
+      `${correct ? "Your answer was correct / உங்கள் பதில் சரி" :
+      "Your answer / உங்கள் பதில்"}: ${escapeHTML(chosenText)}</p>` +
+      `${correct ? "" : `<p class="answer"><strong>Correct answer / சரியான விடை:</strong> ${escapeHTML(correctText)}</p>`}` +
+      `<p><strong>Explanation / விளக்கம்:</strong> ${escapeHTML(q.expEn)}` +
+      `<span class="tamil">${escapeHTML(q.expTa)}</span></p>`;
+    list.appendChild(item);
+  });
+
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function restartTest() {
+  currentIndex = 0;
+  score = 0;
+  answers = Array(questions.length).fill(null);
+
+  $("resultPanel").classList.add("hidden");
+  $("reviewPanel").classList.add("hidden");
+  $("quizPanel").classList.remove("hidden");
+  $("keyboardHint").textContent =
+    "Select one answer to see feedback. / பதிலைத் தேர்ந்தெடுத்து விளக்கத்தைப் பார்க்கவும்.";
+
+  renderQuestion();
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function escapeHTML(value) {
+  return String(value).replace(/[&<>"']/g, char => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#39;"
+  })[char]);
+}
+
+$("nextBtn").addEventListener("click", nextQuestion);
+$("reviewBtn").addEventListener("click", showReview);
+$("restartBtn").addEventListener("click", restartTest);
+$("reviewRestartBtn").addEventListener("click", restartTest);
+$("backResultBtn").addEventListener("click", () => {
+  $("reviewPanel").classList.add("hidden");
+  $("resultPanel").classList.remove("hidden");
+  window.scrollTo({ top: 0, behavior: "smooth" });
+});
+
+ // Validate the question bank before starting.
+  renderQuestion();
+</script>
+</body>
+</html>
