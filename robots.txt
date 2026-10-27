@@ -1,6 +1,6 @@
 User-agent: Mediapartners-Google
-allow:
+disallow:
 
 User-agent: Google-Display-Ads-Bot
-allow:
+disallow:
 
